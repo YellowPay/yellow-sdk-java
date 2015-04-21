@@ -86,7 +86,7 @@ public class YellowSDK {
     /**
      *
      * @param payload array for all api parameters like: amount, currency, callback ... etc.
-     * @return \GuzzleHttp\Message\ResponseInterface|mixed|null
+     * @return HashMap of the response
      */
     public HashMap<String, String> createInvoice(Map<String, Object> payload)
     {
@@ -107,21 +107,23 @@ public class YellowSDK {
     /**
      * check invoice status
      * @param id
-     * @return \GuzzleHttp\Message\ResponseInterface|mixed|null
+     * @return HashMap of the response
      */
-    public String checkInvoiceStatus(String id)
+    public HashMap<String, String> checkInvoiceStatus(String id)
     {
         String url  = this.serverRoot + (this.API_URI_CHECK_PAYMENT).replace("[id]", id);
         String response;
+        HashMap<String, String> responseMap = new HashMap<String, String>();
         
         try {
             response = this.makeHTTPRequest("GET", url, new HashMap<String, Object>());
+            responseMap = (HashMap)JSONValue.parse(response);
         } catch (IOException ex) {
             response = ex.getMessage();
             Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
         }
                 
-        return response;
+        return responseMap;
     }
     
     /**
