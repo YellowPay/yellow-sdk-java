@@ -18,14 +18,16 @@ import java.util.HashMap;
 public class Demo {
     
     public static void main(String[] args) {
-        YellowSDK yellowSDK = new YellowSDK(api_key, api_secret);
+        String apiKey = "<enter your api key>";
+        String apiSecret = "<enter your api secret>";
+        YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
         //create invoice
         Map<String, Object> payload = new HashMap<>();
         payload.put("base_price", 1);
         payload.put("base_ccy", "USD");
         payload.put("callback", "http://yourdomain.local/sdk/sample/ipn.php");
-        payload.put("type", "embedded");
+        payload.put("type", "cart");
         System.out.println(yellowSDK.createInvoice(payload));
     }
 }
@@ -55,5 +57,21 @@ You should see something similar to the following in your terminal:
 To query an invoice that you created, just pass in the `invoice_id` to the `checkInvoiceStatus` function
 
 ```
-System.out.println(yellowSDK.checkInvoiceStatus(invoice id));
+String invoiceId = "<enter your invoice id>";
+System.out.println(yellowSDK.checkInvoiceStatus(invoiceId));
 ```
+
+### IPN validation :
+ to validate the IPN simply use following snippet on your IPN page/controller 
+```
+ String url = "<enter your callback url>";
+ String signature = "<enter signature>";
+ String url = "<enter nonce>";
+ String url = "<enter body>";
+ boolean isVerified = verifyIPN(url, signature, nonce, body)
+```
+
+### Documentation
+
+More information can be found in the online documentation at
+http://yellowpay.co/docs/api/.

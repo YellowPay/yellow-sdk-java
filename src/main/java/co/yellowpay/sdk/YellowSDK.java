@@ -88,19 +88,20 @@ public class YellowSDK {
      * @param payload array for all api parameters like: amount, currency, callback ... etc.
      * @return \GuzzleHttp\Message\ResponseInterface|mixed|null
      */
-    public String createInvoice(Map<String, Object> payload)
+    public HashMap<String, String> createInvoice(Map<String, Object> payload)
     {
         String url  = this.serverRoot + this.API_URI_CREATE_INVOICE;
         String response;
+        HashMap<String, String> responseMap = new HashMap<String, String>();
         
         try {
-            response = this.makeHTTPRequest('p', url, payload);
+            response = this.makeHTTPRequest("POST", url, payload);
+            responseMap = (HashMap)JSONValue.parse(response);
         } catch (IOException ex) {
-            response = ex.getMessage();
             Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
         }
                 
-        return response;
+        return responseMap;
     }
 
     /**
@@ -114,7 +115,7 @@ public class YellowSDK {
         String response;
         
         try {
-            response = this.makeHTTPRequest('g', url, new HashMap<String, Object>());
+            response = this.makeHTTPRequest("GET", url, new HashMap<String, Object>());
         } catch (IOException ex) {
             response = ex.getMessage();
             Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
@@ -130,32 +131,32 @@ public class YellowSDK {
      * @param payload payload array
      * @return String
      */
-    private String makeHTTPRequest(char type, String url, Map<String, Object> payload) 
+    private String makeHTTPRequest(String type, String url, Map<String, Object> payload) 
             throws UnsupportedEncodingException, IOException
     {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         
         HttpRequestBase httpRequest;
-        if( type == 'p' ){
-            httpRequest = new HttpPost(url);
-        }else if( type == 'g' ){
-            httpRequest = new HttpGet(url);
-        }else{
-            return "error";
+        switch (type) {
+            case "POST":
+                httpRequest = new HttpPost(url);
+                break;
+            case "GET":
+                httpRequest = new HttpGet(url);
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
 
         String nonce = String.valueOf(System.currentTimeMillis());
         String body = "";
         String message;
-        boolean append_body;
         
         if( !payload.isEmpty() ){
             body        = JSONValue.toJSONString(payload);
             message     = nonce + url + body;
-            append_body = true;
         }else{
             message     = nonce + url;
-            append_body = false;
         }
         
         String signature = this.signMessage(message);
@@ -169,7 +170,7 @@ public class YellowSDK {
         httpRequest.setHeader("content-type", "application/json");
 
         // add body
-        if(append_body){
+        if( body.length() > 0 ){
             StringEntity entity = new StringEntity(body);
             ((HttpPost)httpRequest).setEntity(entity);
         }
@@ -250,15 +251,14 @@ public class YellowSDK {
      * @param url string
      * @param signature string
      * @param nonce string
-     * @param key string | public key that sent with IPN headers
      * @param body
      * @return boolean
      */
-    public boolean verifyIPN(String url, String signature, String key, String nonce, String body)
+    public boolean verifyIPN(String url, String signature, String nonce, String body)
     {
-        if ( key == null || key.isEmpty() || 
+        if ( url == null || url.isEmpty() || 
+             signature == null || signature.isEmpty() ||
              nonce == null || nonce.isEmpty() || 
-             signature == null || signature.isEmpty() || 
              body == null || body.isEmpty() ){
             // missing headers OR an empty payload
             return false;
@@ -270,4 +270,5 @@ public class YellowSDK {
         // valid or invalid IPN call
         return !calculated_signature.equals(signature);
     }
+
 }
