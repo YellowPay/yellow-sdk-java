@@ -37,20 +37,21 @@ You should see something similar to the following in your terminal:
 
 ```
 {
-    "address": "155xsayoDXxRFP9rxDoecmpVUo7y5xKtc7", # Invoice Address
-    "base_ccy": "USD",
-    "base_price": "0.05",
-    "callback": "https://example.com",
-    "expiration": "2015-03-10T18:17:51.248Z", # Each invoice expires after 10 minutes of creation
-    "id": "6dd264975861fddbfe4404ed995f1ca4", # Invoice ID (to query the invoice later if you need to!)
-    "invoice_ccy": "BTC",
-    "invoice_price": "0.00017070",
-    "received": "0",
-    "redirect": null,
-    "remaining": "0.00017070",
-    "server_time": "2015-03-10T18:07:51.454Z",
+    "server_time":"2015-04-24T02:15:43.671Z",
+    "address":"1A58yrV7fF2LfQdcyCrCWpMpXABFSZM2HF", # Invoice Address
+    "base_ccy":"USD",
+    "invoice_ccy":"BTC",
+    "received":"0",
+    "type":"cart",
+    "url":"\/\/cdn.yellowpay.co\/invoice.70d473ee.html?invoiceId=JNRWCN8CM7F2395J8B879K5AZV",
+    "remaining":"0.00430256",
+    "base_price":"1.00000000",
+    "callback":"http:\/\/yourdomain.local\/sdk\/sample\/ipn.php",
+    "expiration":"2015-04-24T02:25:43.588Z", # Each invoice expires after 10 minutes of creation
+    "id":"JNRWCN8CM7F2395J8B879K5AZV", # Invoice ID (to query the invoice later if you need to!)
+    "invoice_price":"0.00430256",
+    "order":null,
     "status": "new", # Status of the invoice. Other values are "authorizing" for unconfirmed transactions, and "paid" for confirmed transactions
-    "url": "https://cdn.yellowpay.co/invoice.5f0d082e.html?invoiceId=6dd264975861fddbfe4404ed995f1ca4" # Direct URL for the invoice. You can use it to embed the invoice widget in an iframe on your website.
 }
 ```
 
@@ -66,9 +67,9 @@ System.out.println(yellowSDK.checkInvoiceStatus(invoiceId));
 ```
  String url = "<enter your callback url>";
  String signature = "<enter signature>";
- String url = "<enter nonce>";
- String url = "<enter body>";
- boolean isVerified = verifyIPN(url, signature, nonce, body)
+ String nonce = "<enter nonce>";
+ String body = "<enter body>";
+ boolean isVerified = yellowSDK.verifyIPN(url, signature, nonce, body)
 ```
 
 ### Documentation
