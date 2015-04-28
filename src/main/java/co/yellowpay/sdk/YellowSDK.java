@@ -68,19 +68,19 @@ public class YellowSDK {
 
     /**
      * constructor method
-     * @note : if we want to use custom API server , we will read it automatically from EVN var
-     * @param api_key => public key
-     * @param api_secret => private key
+     * if we want to use custom API server , we will read it automatically from EVN var
+     * @param apiKey public key
+     * @param apiSecret private key
      */
-    public YellowSDK(String api_key, String api_secret) {
+    public YellowSDK(String apiKey, String apiSecret) {
         // set custom API server
         String customServerRoot = System.getenv("YELLOW_API_SERVER");
         if( customServerRoot != null ){
             this.serverRoot = customServerRoot;
         }
         
-        this.API_KEY    = api_key;
-        this.API_SECRET = api_secret;
+        this.API_KEY    = apiKey;
+        this.API_SECRET = apiSecret;
     }
     
     /**
@@ -106,7 +106,7 @@ public class YellowSDK {
 
     /**
      * check invoice status
-     * @param id
+     * @param id of the invoice wants to check
      * @return HashMap of the response
      */
     public HashMap<String, String> checkInvoiceStatus(String id)
@@ -121,6 +121,9 @@ public class YellowSDK {
         } catch (IOException ex) {
             response = ex.getMessage();
             Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassCastException ex) {
+            response = ex.getMessage();
+            Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
         }
                 
         return responseMap;
@@ -129,8 +132,8 @@ public class YellowSDK {
     /**
      * creates the http data array for both createInvoice / checkInvoiceStatus
      *
-     * @param url url used to create signature
-     * @param payload payload array
+     * @param url used to create signature
+     * @param payload array
      * @return String
      */
     private String makeHTTPRequest(String type, String url, Map<String, Object> payload) 
@@ -253,7 +256,7 @@ public class YellowSDK {
      * @param url string
      * @param signature string
      * @param nonce string
-     * @param body
+     * @param body string
      * @return boolean
      */
     public boolean verifyIPN(String url, String signature, String nonce, String body)
