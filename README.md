@@ -66,10 +66,8 @@ System.out.println(yellowSDK.checkInvoiceStatus(invoiceId));
 ```
 
 ### IPN validation :
- to validate the IPN simply use following snippet on your IPN page/controller 
- note: 
- check this demo for getting the url, signature, nonce, body values from the request
- https://github.com/YellowPay/yellowdemo-java/blob/master/src/java/co/yellowpay/IPN.java#L38-L41
+ To validate the IPN you can use the following snippet on your IPN page/controller. See [here](https://github.com/YellowPay/yellowdemo-java/blob/master/src/java/co/yellowpay/IPN.java#L38-L41) for one example of how to extract the url, signature, nonce and body from a request.
+
 ```
  String url = "<enter your callback url>";
  String signature = "<enter signature>";
