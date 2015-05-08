@@ -27,7 +27,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class YellowSDK {
     /**
-     * sdk version
+     * SDK version
      */
     private final String VERSION = "0.1";
 
@@ -53,14 +53,14 @@ public class YellowSDK {
     private final String API_URI_CHECK_PAYMENT = "/invoice/[id]/";
 
     /**
-     * api key
+     * API key
      *
      * @var String
      */
     private final String API_KEY;
 
     /**
-     * api secret
+     * API secret
      *
      * @var String
      */
@@ -68,7 +68,7 @@ public class YellowSDK {
 
     /**
      * constructor method
-     * if we want to use custom API server , we will read it automatically from EVN var
+     * if we want to use custom API server , we will read it automatically from EVN variable
      * @param apiKey public key
      * @param apiSecret private key
      */
@@ -85,20 +85,22 @@ public class YellowSDK {
     
     /**
      *
-     * @param payload array for all api parameters like: amount, currency, callback ... etc.
+     * @param payload array for all API parameters like: amount, currency, callback ... etc.
      * @return HashMap of the response
+     * @throws co.yellowpay.sdk.YellowException
      */
-    public HashMap<String, String> createInvoice(Map<String, Object> payload)
+    public HashMap<String, String> createInvoice(Map<String, String> payload) throws YellowException
     {
         String url  = this.serverRoot + this.API_URI_CREATE_INVOICE;
         String response;
-        HashMap<String, String> responseMap = new HashMap<String, String>();
+        HashMap<String, String> responseMap = new HashMap<>();
         
         try {
             response = this.makeHTTPRequest("POST", url, payload);
             responseMap = (HashMap)JSONValue.parse(response);
-        } catch (IOException ex) {
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException ex) {
             Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
+            throw new YellowException(ex.getMessage());
         }
                 
         return responseMap;
@@ -108,36 +110,68 @@ public class YellowSDK {
      * check invoice status
      * @param id of the invoice wants to check
      * @return HashMap of the response
+     * @throws co.yellowpay.sdk.YellowException
      */
-    public HashMap<String, String> checkInvoiceStatus(String id)
+    public HashMap<String, String> checkInvoiceStatus(String id) throws YellowException
     {
         String url  = this.serverRoot + (this.API_URI_CHECK_PAYMENT).replace("[id]", id);
         String response;
-        HashMap<String, String> responseMap = new HashMap<String, String>();
+        HashMap<String, String> responseMap = new HashMap<>();
         
         try {
-            response = this.makeHTTPRequest("GET", url, new HashMap<String, Object>());
+            response = this.makeHTTPRequest("GET", url, new HashMap<>());
             responseMap = (HashMap)JSONValue.parse(response);
-        } catch (IOException ex) {
-            response = ex.getMessage();
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException  ex) {
             Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassCastException ex) {
-            response = ex.getMessage();
-            Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
+            throw new YellowException(ex.getMessage());
         }
-                
+        
         return responseMap;
     }
     
     /**
-     * creates the http data array for both createInvoice / checkInvoiceStatus
+     * Validate IPN
+     *
+     * @param url string
+     * @param signature string
+     * @param nonce string
+     * @param body string
+     * @return boolean
+     * @throws co.yellowpay.sdk.YellowException
+     */
+    public boolean verifyIPN(String url, String signature, String nonce, String body) throws YellowException
+    {
+        if ( url == null || url.isEmpty() || 
+             signature == null || signature.isEmpty() ||
+             nonce == null || nonce.isEmpty() || 
+             body == null ){
+            // missing headers OR an empty payload
+            return false;
+        }
+        
+        String message = nonce + url + body;
+        String calculated_signature = "";
+        try {
+            calculated_signature = this.signMessage(message);
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException ex) {
+            Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
+            throw new YellowException(ex.getMessage());
+        }
+        
+        // valid or invalid IPN call
+        return !calculated_signature.equals(signature);
+    }
+    
+    /**
+     * creates the HTTP data array for both createInvoice / checkInvoiceStatus
      *
      * @param url used to create signature
      * @param payload array
      * @return String
+     * @throws co.yellowpay.sdk.YellowException
      */
-    private String makeHTTPRequest(String type, String url, Map<String, Object> payload) 
-            throws UnsupportedEncodingException, IOException
+    private String makeHTTPRequest(String type, String url, Map<String, String> payload) 
+            throws UnsupportedEncodingException, IOException, YellowException, NoSuchAlgorithmException, InvalidKeyException
     {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         
@@ -214,7 +248,8 @@ public class YellowSDK {
      * @param $message string
      * @return string
      */
-    private String signMessage(String message)
+    private String signMessage(String message) 
+            throws UnsupportedEncodingException, UnsupportedEncodingException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
     {
         return hmacDigest("HmacSHA256", message, this.API_SECRET);
     }
@@ -226,54 +261,28 @@ public class YellowSDK {
      * @param keyString string
      * @return string
      */
-    private String hmacDigest(String algo, String msg, String keyString) {
-        String digest = null;
-        try {
-          SecretKeySpec key = new SecretKeySpec((keyString).getBytes("UTF-8"), algo);
-          Mac mac = Mac.getInstance(algo);
-          mac.init(key);
+    private String hmacDigest(String algo, String msg, String keyString) 
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
+        String digest;
 
-          byte[] bytes = mac.doFinal(msg.getBytes("ASCII"));
+        SecretKeySpec key = new SecretKeySpec((keyString).getBytes("UTF-8"), algo);
+        Mac mac = Mac.getInstance(algo);
+        mac.init(key);
 
-          StringBuilder hash = new StringBuilder();
-          for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(0xFF & bytes[i]);
-            if (hex.length() == 1) {
-              hash.append('0');
-            }
-            hash.append(hex);
+        byte[] bytes = mac.doFinal(msg.getBytes("ASCII"));
+
+        StringBuilder hash = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+          String hex = Integer.toHexString(0xFF & bytes[i]);
+          if (hex.length() == 1) {
+            hash.append('0');
           }
-          digest = hash.toString();
-        } catch (UnsupportedEncodingException | InvalidKeyException | NoSuchAlgorithmException e) {
+          hash.append(hex);
         }
+        digest = hash.toString();
         
         return digest;
     }
 
-    /**
-     * Validate IPN
-     *
-     * @param url string
-     * @param signature string
-     * @param nonce string
-     * @param body string
-     * @return boolean
-     */
-    public boolean verifyIPN(String url, String signature, String nonce, String body)
-    {
-        if ( url == null || url.isEmpty() || 
-             signature == null || signature.isEmpty() ||
-             nonce == null || nonce.isEmpty() || 
-             body == null || body.isEmpty() ){
-            // missing headers OR an empty payload
-            return false;
-        }
-        
-        String message = nonce + url + body;
-        String calculated_signature = this.signMessage(message);
-        
-        // valid or invalid IPN call
-        return !calculated_signature.equals(signature);
-    }
 
 }

@@ -1,7 +1,10 @@
 Yellow Java SDK
 =====================
 This is the Yellow Java SDK. This simple SDK contains couple of functions that makes it easy to integrate with the Yellow API. To get started just:
+
 ```
+git clone https://github.com/YellowPay/yellow-sdk-java.git yellow-sdk-java
+cd yellow-sdk-java
 mvn install
 ```
 
@@ -23,10 +26,10 @@ public class Demo {
         YellowSDK yellowSDK = new YellowSDK(apiKey, apiSecret);
         
         //create invoice
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("base_price", 1);
+        Map<String, String> payload = new HashMap<>();
+        payload.put("base_price", "1");
         payload.put("base_ccy", "USD");
-        payload.put("callback", "http://yourdomain.local/sdk/sample/ipn.php");
+        payload.put("callback", "https://yourdomain.local/sdk/sample/ipn.php");
         payload.put("type", "cart");
         System.out.println(yellowSDK.createInvoice(payload));
     }
@@ -46,7 +49,7 @@ You should see something similar to the following in your terminal:
     "url":"\/\/cdn.yellowpay.co\/invoice.70d473ee.html?invoiceId=JNRWCN8CM7F2395J8B879K5AZV",
     "remaining":"0.00430256",
     "base_price":"1.00000000",
-    "callback":"http:\/\/yourdomain.local\/sdk\/sample\/ipn.php",
+    "callback":"https:\/\/yourdomain.local\/sdk\/sample\/ipn.php",
     "expiration":"2015-04-24T02:25:43.588Z", # Each invoice expires after 10 minutes of creation
     "id":"JNRWCN8CM7F2395J8B879K5AZV", # Invoice ID (to query the invoice later if you need to!)
     "invoice_price":"0.00430256",
