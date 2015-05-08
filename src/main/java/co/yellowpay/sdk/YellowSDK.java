@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.json.simple.JSONValue;
@@ -99,7 +97,6 @@ public class YellowSDK {
             response = this.makeHTTPRequest("POST", url, payload);
             responseMap = (HashMap)JSONValue.parse(response);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException ex) {
-            Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
             throw new YellowException(ex.getMessage());
         }
                 
@@ -122,7 +119,6 @@ public class YellowSDK {
             response = this.makeHTTPRequest("GET", url, new HashMap<String, String>());
             responseMap = (HashMap)JSONValue.parse(response);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException  ex) {
-            Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
             throw new YellowException(ex.getMessage());
         }
         
@@ -154,7 +150,6 @@ public class YellowSDK {
         try {
             calculated_signature = this.signMessage(message);
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException ex) {
-            Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
             throw new YellowException(ex.getMessage());
         }
         
@@ -171,7 +166,7 @@ public class YellowSDK {
      * @throws co.yellowpay.sdk.YellowException
      */
     private String makeHTTPRequest(String type, String url, Map<String, String> payload) 
-            throws UnsupportedEncodingException, IOException, YellowException, NoSuchAlgorithmException, InvalidKeyException
+            throws IOException, NoSuchAlgorithmException, InvalidKeyException
     {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         
@@ -249,7 +244,7 @@ public class YellowSDK {
      * @return string
      */
     private String signMessage(String message) 
-            throws UnsupportedEncodingException, UnsupportedEncodingException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
     {
         return hmacDigest("HmacSHA256", message, this.API_SECRET);
     }
