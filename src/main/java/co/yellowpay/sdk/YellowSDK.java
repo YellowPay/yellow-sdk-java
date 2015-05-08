@@ -93,7 +93,7 @@ public class YellowSDK {
     {
         String url  = this.serverRoot + this.API_URI_CREATE_INVOICE;
         String response;
-        HashMap<String, String> responseMap = new HashMap<>();
+        HashMap<String, String> responseMap = new HashMap<String, String>();
         
         try {
             response = this.makeHTTPRequest("POST", url, payload);
@@ -116,10 +116,10 @@ public class YellowSDK {
     {
         String url  = this.serverRoot + (this.API_URI_CHECK_PAYMENT).replace("[id]", id);
         String response;
-        HashMap<String, String> responseMap = new HashMap<>();
+        HashMap<String, String> responseMap = new HashMap<String, String>();
         
         try {
-            response = this.makeHTTPRequest("GET", url, new HashMap<>());
+            response = this.makeHTTPRequest("GET", url, new HashMap<String, String>());
             responseMap = (HashMap)JSONValue.parse(response);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException  ex) {
             Logger.getLogger(YellowSDK.class.getName()).log(Level.SEVERE, null, ex);
