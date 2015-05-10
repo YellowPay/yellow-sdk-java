@@ -27,7 +27,7 @@ public class YellowSDK {
     /**
      * SDK version
      */
-    private final String VERSION = "0.1";
+    private final String VERSION = "0.0.1";
 
     /**
      * Server Root for Yellow API
@@ -278,6 +278,5 @@ public class YellowSDK {
         
         return digest;
     }
-
 
 }
